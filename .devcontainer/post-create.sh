@@ -47,11 +47,11 @@ npm install -g turbo npm-check-updates || {
 
 # Go開発ツールのインストール
 echo "🔧 Go開発ツールをインストール中..."
-go install github.com/air-verse/air
-go install github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen
-go install github.com/golangci/golangci-lint/cmd/golangci-lint
-go install github.com/golang-migrate/migrate/v4/cmd/migrate
-go install github.com/swaggo/swag/cmd/swag
+go install github.com/air-verse/air@latest
+go install github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen@latest
+go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
+go install github.com/swaggo/swag/cmd/swag@latest
 
 # Go依存関係のダウンロード
 if [ -f "apps/backend/go.mod" ]; then
@@ -69,7 +69,7 @@ fi
 
 # 依存関係のインストール
 echo "📦 依存関係をインストール中..."
-pnpm install --frozen-lockfile
+pnpm install --no-frozen-lockfile
 
 # 型の生成
 echo "🔧 APIの型を生成中..."
@@ -100,9 +100,22 @@ if command -v migrate &> /dev/null && [ -d "apps/backend/migrations" ]; then
 
     if nc -z postgres 5432; then
         cd apps/backend
-        migrate -path ./migrations -database "${DATABASE_URL:-postgres://postgres:postgres@postgres:5432/myapp_dev?sslmode=disable}" up
+        set +e  # 一時的にエラーで終了しないようにする
+        MIGRATE_OUTPUT=$(migrate -path ./migrations -database "${DATABASE_URL:-postgres://postgres:postgres@postgres:5432/myapp_dev?sslmode=disable}" up 2>&1)
+        MIGRATE_EXIT_CODE=$?
+        set -e  # エラーで終了する設定を戻す
+
+        if [ $MIGRATE_EXIT_CODE -ne 0 ]; then
+            if echo "$MIGRATE_OUTPUT" | grep -q "unknown driver"; then
+                log_warning "マイグレーションツールにPostgreSQLドライバーが含まれていません。手動でマイグレーションを実行してください: pnpm run db:migrate"
+            else
+                log_error "マイグレーション失敗: $MIGRATE_OUTPUT"
+                log_warning "マイグレーションは失敗しましたが、セットアップを続行します"
+            fi
+        else
+            log_info "✅ マイグレーション完了"
+        fi
         cd ../..
-        log_info "✅ マイグレーション完了"
     else
         log_warning "PostgreSQLが起動していないため、マイグレーションをスキップしました"
     fi
