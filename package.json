@@ -20,9 +20,16 @@
     "setup": "pnpm install && npm run generate",
     "clean": "turbo run clean",
     "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,css,md}\"",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
     "db:migrate": "cd apps/backend && migrate -path ./migrations -database \"${DATABASE_URL:-postgres://postgres:postgres@postgres:5432/myapp_dev?sslmode=disable}\" up",
     "db:migrate:down": "cd apps/backend && migrate -path ./migrations -database \"${DATABASE_URL:-postgres://postgres:postgres@postgres:5432/myapp_dev?sslmode=disable}\" down 1",
-    "db:migrate:create": "cd apps/backend && migrate create -ext sql -dir ./migrations"
+    "db:migrate:create": "cd apps/backend && migrate create -ext sql -dir ./migrations",
+    "backend:dev": "pnpm --filter backend dev",
+    "backend:build": "pnpm --filter backend build",
+    "backend:test": "pnpm --filter backend test",
+    "backend:lint": "pnpm --filter backend lint",
+    "health-check": "pnpm --filter backend health-check"
   },
   "devDependencies": {
     "@hey-api/openapi-ts": "0.78.3",
