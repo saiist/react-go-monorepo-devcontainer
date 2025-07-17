@@ -16,11 +16,11 @@ type Config struct {
 // Load loads configuration from environment variables
 func Load() *Config {
 	return &Config{
-		Port:        getEnv("PORT", "8080"),
-		DatabaseURL: getEnv("DATABASE_URL", "postgres://user:password@localhost:5432/dbname?sslmode=disable"),
-		FrontendURL: getEnv("FRONTEND_URL", "http://localhost:5173"),
+		Port:        getEnv("API_PORT", "8080"),
+		DatabaseURL: getEnv("DATABASE_URL", "postgres://postgres:postgres@postgres:5432/myapp_dev?sslmode=disable"),
+		FrontendURL: getEnv("FRONTEND_URL", "http://localhost:3000"),
 		JWTSecret:   getEnv("JWT_SECRET", "your-secret-key"),
-		Environment: getEnv("ENVIRONMENT", "development"),
+		Environment: getEnv("GO_ENV", "development"),
 	}
 }
 
