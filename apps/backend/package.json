@@ -1,0 +1,13 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "air",
+    "build": "go build -o dist/server ./cmd/server",
+    "test": "go test ./...",
+    "lint": "golangci-lint run",
+    "clean": "rm -rf dist tmp",
+    "health-check": "curl -X GET http://localhost:8080/api/v1/health"
+  }
+}
