@@ -1,0 +1,60 @@
+{
+  "name": "Go + React Monorepo",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "workspace",
+  "workspaceFolder": "/workspace",
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "24.4.1",
+      "nodeGypDependencies": true
+    },
+    "ghcr.io/devcontainers/features/go:1": {
+      "version": "1.23.6"
+    },
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {
+      "moby": true,
+      "dockerDashComposeVersion": "v2"
+    },
+    "ghcr.io/devcontainers-extra/features/pnpm:2": {},
+    "ghcr.io/devcontainers/features/git:1": {
+      "ppa": false
+    },
+    "ghcr.io/devcontainers/features/github-cli:1": {
+      "installDirectlyFromGitHubRelease": true
+    }
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "golang.go",
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "bradlc.vscode-tailwindcss",
+        "usernamehw.errorlens",
+        "wayou.vscode-todo-highlight",
+        "editorconfig.editorconfig",
+        "42Crunch.vscode-openapi"
+      ],
+      "settings": {
+        // 環境固有のパス
+        "go.goroot": "/usr/local/go",
+
+        // DevContainer特有の設定
+        "terminal.integrated.defaultProfile.linux": "bash"
+      }
+    }
+  },
+  "containerEnv": {
+    "WORKSPACE_FOLDER": "${containerWorkspaceFolder}",
+    "NODE_ENV": "development",
+    "GOPATH": "/go",
+    "GOCACHE": "/go/build-cache"
+  },
+  "remoteEnv": {
+    "PATH": "${containerEnv:PATH}:/workspace/node_modules/.bin",
+    "PNPM_STORE_DIR": "/workspace/.pnpm-store"
+  },
+  "forwardPorts": [3000, 8080, 5432, 6379],
+  "postCreateCommand": "bash .devcontainer/post-create.sh",
+  "remoteUser": "vscode"
+}

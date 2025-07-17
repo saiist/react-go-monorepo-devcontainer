@@ -1,0 +1,12 @@
+{
+  "recommendations": [
+    "golang.go",
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode",
+    "bradlc.vscode-tailwindcss",
+    "usernamehw.errorlens",
+    "wayou.vscode-todo-highlight",
+    "editorconfig.editorconfig",
+    "42Crunch.vscode-openapi"
+  ]
+}

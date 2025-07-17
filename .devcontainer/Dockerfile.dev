@@ -1,0 +1,20 @@
+FROM mcr.microsoft.com/devcontainers/base:ubuntu-22.04
+
+# 必要なパッケージのインストール
+RUN apt-get update && apt-get install -y \
+    git \
+    curl \
+    wget \
+    build-essential \
+    postgresql-client \
+    redis-tools \
+    jq \
+    netcat-openbsd \
+    && rm -rf /var/lib/apt/lists/*
+
+
+# ワークスペースの準備
+RUN mkdir -p /workspace && chown -R vscode:vscode /workspace
+
+USER vscode
+WORKDIR /workspace

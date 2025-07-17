@@ -1,0 +1,131 @@
+run:
+  timeout: 5m
+  modules-download-mode: readonly
+  go: '1.22'
+
+linters:
+  enable:
+    - gofmt
+    - goimports
+    - govet
+    - errcheck
+    - staticcheck
+    - gosimple
+    - ineffassign
+    - typecheck
+    - unused
+    - gosec
+    - gocritic
+    - gocyclo
+    - dupl
+    - misspell
+    - lll
+    - prealloc
+    - bodyclose
+    - noctx
+    - exhaustive
+    - sqlclosecheck
+    - nilerr
+    - tparallel
+    - thelper
+    - predeclared
+    - ifshort
+    - revive
+
+  disable:
+    - structcheck # deprecated
+    - interfacer # deprecated
+    - deadcode # deprecated
+    - varcheck # deprecated
+    - golint # deprecated
+    - scopelint # deprecated
+    - maligned # deprecated
+    - nosnakecase # deprecated
+
+linters-settings:
+  gofmt:
+    simplify: true
+  goimports:
+    local-prefixes: github.com/react-go-monorepo
+  govet:
+    check-shadowing: true
+  gocyclo:
+    min-complexity: 15
+  dupl:
+    threshold: 100
+  gocritic:
+    enabled-tags:
+      - performance
+      - style
+      - experimental
+    disabled-checks:
+      - wrapperFunc
+  lll:
+    line-length: 120
+  misspell:
+    locale: US
+  prealloc:
+    simple: true
+    range-loops: true
+    for-loops: true
+  revive:
+    severity: warning
+    rules:
+      - name: blank-imports
+      - name: context-as-argument
+      - name: context-keys-type
+      - name: dot-imports
+      - name: error-return
+      - name: error-strings
+      - name: error-naming
+      - name: if-return
+      - name: increment-decrement
+      - name: var-naming
+      - name: var-declaration
+      - name: range
+      - name: receiver-naming
+      - name: time-naming
+      - name: unexported-return
+      - name: indent-error-flow
+      - name: errorf
+
+issues:
+  exclude-rules:
+    # テストファイルではいくつかのルールを無効化
+    - path: _test\.go
+      linters:
+        - dupl
+        - gosec
+        - gocritic
+    # 生成されたファイルを除外
+    - path: internal/api/generated\.go
+      linters:
+        - gocyclo
+        - lll
+        - dupl
+        - gocritic
+        - stylecheck
+        - revive
+    # main関数では未使用変数チェックを緩和
+    - path: cmd/
+      linters:
+        - unused
+
+  max-same-issues: 50
+  max-issues-per-linter: 0
+
+  # 新しいコードのみチェック（オプション）
+  # new: true
+  # new-from-rev: HEAD~
+
+  # ビルドタグ
+  # build-tags:
+  #   - integration
+
+severity:
+  default-severity: warning
+  case-sensitive: false
+  rules:
+    - linters:
+        - gosec
+      severity: error

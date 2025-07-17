@@ -1,0 +1,37 @@
+{
+  "name": "my-app",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "test": "turbo run test",
+    "lint": "turbo run lint",
+    "type-check": "turbo run type-check",
+    "generate": "npm run generate:types",
+    "generate:types": "npm run generate:frontend && npm run generate:backend",
+    "generate:frontend": "npx @hey-api/openapi-ts -i api/openapi.yaml -o apps/frontend/src/api/generated -c @hey-api/client-fetch",
+    "generate:backend": "cd apps/backend && oapi-codegen -package api -generate chi-server,types,spec ../../api/openapi.yaml > internal/api/generated.go",
+    "setup": "pnpm install && npm run generate",
+    "clean": "turbo run clean",
+    "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,css,md}\"",
+    "db:migrate": "cd apps/backend && migrate -path ./migrations -database \"${DATABASE_URL:-postgres://postgres:postgres@postgres:5432/myapp_dev?sslmode=disable}\" up",
+    "db:migrate:down": "cd apps/backend && migrate -path ./migrations -database \"${DATABASE_URL:-postgres://postgres:postgres@postgres:5432/myapp_dev?sslmode=disable}\" down 1",
+    "db:migrate:create": "cd apps/backend && migrate create -ext sql -dir ./migrations"
+  },
+  "devDependencies": {
+    "@hey-api/openapi-ts": "0.78.3",
+    "prettier": "3.6.2",
+    "turbo": "2.5.5"
+  },
+  "packageManager": "pnpm@10.13.1",
+  "engines": {
+    "node": ">=22.0.0",
+    "pnpm": ">=9.0.0"
+  }
+}

@@ -1,0 +1,13 @@
+# Prettierで整形しないファイル
+*.go
+Makefile
+*.min.js
+*.min.css
+dist/
+build/
+coverage/
+.turbo/
+node_modules/
+pnpm-lock.yaml
+package-lock.json
+yarn.lock
