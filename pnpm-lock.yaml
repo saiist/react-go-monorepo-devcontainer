@@ -18,6 +18,8 @@ importers:
         specifier: 2.5.5
         version: 2.5.5
 
+  apps/backend: {}
+
   apps/frontend:
     dependencies:
       '@tanstack/react-query':

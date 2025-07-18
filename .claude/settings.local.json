@@ -10,7 +10,8 @@
       "Bash(docker logs:*)",
       "Bash(docker compose:*)",
       "Bash(sudo rm:*)",
-      "Bash(sudo tar:*)"
+      "Bash(sudo tar:*)",
+      "WebFetch(domain:docs.anthropic.com)"
     ],
     "deny": []
   }
