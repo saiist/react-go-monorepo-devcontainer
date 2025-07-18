@@ -42,15 +42,31 @@ components:
             - CONFLICT
             - RATE_LIMIT_EXCEEDED
             - INTERNAL_ERROR
-          example: 'VALIDATION_ERROR'
+          example: 'CONFLICT'
         message:
           type: string
           description: エラーメッセージ
-          example: '検証に失敗しました'
+          example: 'このメールアドレスは既に使用されています'
         details:
           type: object
           description: 追加のエラー詳細（フィールド固有のエラー、メタデータなど）
           additionalProperties: true
+          example:
+            field: 'email'
+            value: 'user@example.com'
+        timestamp:
+          type: string
+          format: date-time
+          description: エラー発生時刻
+          example: '2025-01-20T10:30:00Z'
+        traceId:
+          type: string
+          description: エラー追跡用のトレースID
+          example: 'b3d4f9e8-1234-5678-9abc-def012345678'
+        path:
+          type: string
+          description: エラーが発生したAPIパス
+          example: '/api/v1/auth/register'
 
     User:
       type: object
