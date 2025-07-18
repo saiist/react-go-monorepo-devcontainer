@@ -1,5 +1,5 @@
-import type { Error as ApiError, ErrorMessageMap } from '@/api/generated/types.gen';
-import { client } from '@/api/generated/client';
+import type { _Error as ApiError, ErrorMessageMap } from '@/api/generated/types.gen';
+import { getErrorMessages } from '@/api/generated';
 import { ERROR_MESSAGES, FIELD_ERROR_MESSAGES, HTTP_STATUS_MESSAGES } from '@/constants/errorMessages';
 
 // APIから取得したエラーメッセージのキャッシュ
@@ -22,7 +22,7 @@ export async function fetchErrorMessages(): Promise<ErrorMessageMap> {
   }
 
   try {
-    const response = await client.getErrorMessages();
+    const response = await getErrorMessages();
     if (response.data) {
       cachedErrorMessages = response.data;
       return response.data;
