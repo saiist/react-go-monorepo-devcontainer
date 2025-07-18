@@ -25,32 +25,6 @@ components:
       description: 'Authorization: Bearer <token>'
 
   schemas:
-    ErrorMessageMap:
-      type: object
-      description: エラーコードと日本語メッセージのマッピング
-      properties:
-        VALIDATION_ERROR:
-          type: string
-          example: '入力内容に誤りがあります'
-        UNAUTHORIZED:
-          type: string
-          example: 'ログインが必要です'
-        FORBIDDEN:
-          type: string
-          example: 'アクセス権限がありません'
-        NOT_FOUND:
-          type: string
-          example: 'データが見つかりません'
-        CONFLICT:
-          type: string
-          example: '既に登録されています'
-        RATE_LIMIT_EXCEEDED:
-          type: string
-          example: 'アクセス制限中です。しばらくお待ちください'
-        INTERNAL_ERROR:
-          type: string
-          example: 'システムエラーが発生しました'
-
     Error:
       type: object
       required:
@@ -71,11 +45,7 @@ components:
           example: 'CONFLICT'
         message:
           type: string
-          description: エラーメッセージ（英語）
-          example: 'User with email user@example.com already exists'
-        messageJa:
-          type: string
-          description: エラーメッセージ（日本語）
+          description: エラーメッセージ
           example: 'このメールアドレスは既に使用されています'
         details:
           type: object
@@ -237,29 +207,6 @@ components:
           $ref: '#/components/schemas/User'
 
 paths:
-  /system/error-messages:
-    get:
-      summary: エラーメッセージ一覧を取得
-      operationId: getErrorMessages
-      tags:
-        - system
-      security: []
-      responses:
-        '200':
-          description: エラーメッセージ一覧
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorMessageMap'
-              example:
-                VALIDATION_ERROR: '入力内容に誤りがあります'
-                UNAUTHORIZED: 'ログインが必要です'
-                FORBIDDEN: 'アクセス権限がありません'
-                NOT_FOUND: 'データが見つかりません'
-                CONFLICT: '既に登録されています'
-                RATE_LIMIT_EXCEEDED: 'アクセス制限中です。しばらくお待ちください'
-                INTERNAL_ERROR: 'システムエラーが発生しました'
-
   /health:
     get:
       summary: Health check
