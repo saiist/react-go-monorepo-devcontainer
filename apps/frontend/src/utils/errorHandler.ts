@@ -1,12 +1,16 @@
 import type { _Error as ApiError } from '@/api/generated/types.gen';
-import { ERROR_MESSAGES, FIELD_ERROR_MESSAGES, HTTP_STATUS_MESSAGES } from '@/constants/errorMessages';
+import {
+  ERROR_MESSAGES,
+  FIELD_ERROR_MESSAGES,
+  HTTP_STATUS_MESSAGES,
+} from '@/constants/errorMessages';
 
 /**
  * APIエラーから適切なエラーメッセージを取得
- * 
+ *
  * @param error APIエラーオブジェクト
  * @returns ユーザー向けエラーメッセージ
- * 
+ *
  * @example
  * ```typescript
  * try {
@@ -22,9 +26,10 @@ export function getErrorMessage(error: ApiError | undefined): string {
     return ERROR_MESSAGES.INTERNAL_ERROR;
   }
 
+  // TODO:エラーメッセージの返却は考えたい
   // 1. まずAPIレスポンスの日本語メッセージを確認
-  if (error.messageJa) {
-    return error.messageJa;
+  if (error.message) {
+    return error.message;
   }
 
   // 2. 次にローカルの定義済みメッセージを確認
@@ -34,11 +39,11 @@ export function getErrorMessage(error: ApiError | undefined): string {
 
 /**
  * フィールド固有のエラーメッセージを取得
- * 
+ *
  * @param error APIエラーオブジェクト
  * @param fieldName フィールド名
  * @returns フィールド固有のエラーメッセージ、または汎用メッセージ
- * 
+ *
  * @example
  * ```typescript
  * const error = {
@@ -49,13 +54,16 @@ export function getErrorMessage(error: ApiError | undefined): string {
  * // => "有効なメールアドレスを入力してください"
  * ```
  */
-export function getFieldErrorMessage(error: ApiError | undefined, fieldName: string): string | null {
+export function getFieldErrorMessage(
+  error: ApiError | undefined,
+  fieldName: string
+): string | null {
   if (!error?.details || typeof error.details !== 'object') {
     return null;
   }
 
   const details = error.details as Record<string, unknown>;
-  
+
   // フィールドが一致する場合
   if (details.field === fieldName) {
     const fieldMessages = FIELD_ERROR_MESSAGES[fieldName as keyof typeof FIELD_ERROR_MESSAGES];
@@ -72,10 +80,10 @@ export function getFieldErrorMessage(error: ApiError | undefined, fieldName: str
 
 /**
  * HTTPステータスコードから適切なエラーメッセージを取得
- * 
+ *
  * @param status HTTPステータスコード
  * @returns ユーザー向けエラーメッセージ
- * 
+ *
  * @example
  * ```typescript
  * const response = await fetch('/api/users');
@@ -92,10 +100,10 @@ export function getHttpErrorMessage(status: number): string {
 
 /**
  * エラーの詳細情報をログ出力用に整形
- * 
+ *
  * @param error APIエラーオブジェクト
  * @returns ログ出力用の整形されたオブジェクト
- * 
+ *
  * @example
  * ```typescript
  * catch (error) {
@@ -120,10 +128,10 @@ export function formatErrorForLogging(error: ApiError | undefined) {
 
 /**
  * リトライ可能なエラーかどうかを判定
- * 
+ *
  * @param error APIエラーオブジェクト
  * @returns リトライ可能な場合はtrue
- * 
+ *
  * @example
  * ```typescript
  * if (isRetryableError(error)) {
@@ -144,10 +152,10 @@ export function isRetryableError(error: ApiError | undefined): boolean {
 
 /**
  * 認証関連のエラーかどうかを判定
- * 
+ *
  * @param error APIエラーオブジェクト
  * @returns 認証関連エラーの場合はtrue
- * 
+ *
  * @example
  * ```typescript
  * if (isAuthError(error)) {

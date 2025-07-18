@@ -13,7 +13,11 @@
       "Bash(sudo tar:*)",
       "WebFetch(domain:docs.anthropic.com)",
       "Bash(chmod:*)",
-      "mcp__ide__getDiagnostics"
+      "mcp__ide__getDiagnostics",
+      "Bash(git add:*)",
+      "Bash(go build:*)",
+      "Bash(pnpm generate:*)",
+      "Bash(git reset:*)"
     ],
     "deny": []
   }
