@@ -2,16 +2,16 @@ openapi: 3.0.3
 info:
   title: My App API
   version: 1.0.0
-  description: My App API specification
+  description: My App API仕様書
   contact:
-    name: API Support
+    name: APIサポート
     email: api@example.com
 
 servers:
   - url: http://localhost:8080/api/v1
-    description: Development server
+    description: 開発サーバー
   - url: https://api.example.com/v1
-    description: Production server
+    description: 本番サーバー
 
 security:
   - bearerAuth: []
@@ -33,12 +33,23 @@ components:
       properties:
         code:
           type: string
+          description: エラーの種類を示すエラーコード
+          enum:
+            - VALIDATION_ERROR
+            - UNAUTHORIZED
+            - FORBIDDEN
+            - NOT_FOUND
+            - CONFLICT
+            - RATE_LIMIT_EXCEEDED
+            - INTERNAL_ERROR
           example: 'VALIDATION_ERROR'
         message:
           type: string
-          example: 'Validation failed'
+          description: エラーメッセージ
+          example: '検証に失敗しました'
         details:
           type: object
+          description: 追加のエラー詳細（フィールド固有のエラー、メタデータなど）
           additionalProperties: true
 
     User:
@@ -74,9 +85,11 @@ components:
         createdAt:
           type: string
           format: date-time
+          readOnly: true
         updatedAt:
           type: string
           format: date-time
+          readOnly: true
 
     CreateUserRequest:
       type: object
@@ -96,6 +109,8 @@ components:
           type: string
           minLength: 8
           maxLength: 128
+          pattern: '^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]+$'
+          description: 'パスワードは大文字、小文字、数字、特殊文字を少なくとも1つずつ含む必要があります'
         fullName:
           type: string
           maxLength: 255
@@ -103,6 +118,7 @@ components:
           type: string
           format: uri
           maxLength: 500
+          default: ''
 
     UpdateUserRequest:
       type: object
@@ -121,6 +137,7 @@ components:
           type: string
           format: uri
           maxLength: 500
+          default: ''
         isActive:
           type: boolean
         isVerified:
@@ -144,6 +161,8 @@ components:
           type: string
           minLength: 8
           maxLength: 128
+          pattern: '^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]+$'
+          description: 'パスワードは大文字、小文字、数字、特殊文字を少なくとも1つずつ含む必要があります'
         fullName:
           type: string
           maxLength: 255
@@ -181,7 +200,7 @@ paths:
       security: []
       responses:
         '200':
-          description: Service is healthy
+          description: サービスは正常です
           content:
             application/json:
               schema:
@@ -212,13 +231,13 @@ paths:
               $ref: '#/components/schemas/LoginRequest'
       responses:
         '200':
-          description: Login successful
+          description: ログイン成功
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/LoginResponse'
         '401':
-          description: Invalid credentials
+          description: 認証情報が無効です
           content:
             application/json:
               schema:
@@ -244,7 +263,7 @@ paths:
                   type: string
       responses:
         '200':
-          description: Token refreshed
+          description: トークンが更新されました
           content:
             application/json:
               schema:
@@ -270,19 +289,19 @@ paths:
               $ref: '#/components/schemas/RegisterRequest'
       responses:
         '201':
-          description: User registered successfully
+          description: ユーザー登録に成功しました
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/User'
         '400':
-          description: Validation error
+          description: 検証エラー
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
         '409':
-          description: User already exists
+          description: ユーザーは既に存在します
           content:
             application/json:
               schema:
@@ -297,29 +316,29 @@ paths:
       parameters:
         - name: isActive
           in: query
-          description: Filter by active status
+          description: アクティブ状態でフィルタリング
           schema:
             type: boolean
         - name: isVerified
           in: query
-          description: Filter by verification status
+          description: 検証状態でフィルタリング
           schema:
             type: boolean
         - name: search
           in: query
-          description: Search by email or username
+          description: メールアドレスまたはユーザー名で検索
           schema:
             type: string
         - name: page
           in: query
-          description: Page number
+          description: ページ番号
           schema:
             type: integer
             minimum: 1
             default: 1
         - name: limit
           in: query
-          description: Items per page
+          description: 1ページあたりのアイテム数
           schema:
             type: integer
             minimum: 1
@@ -327,7 +346,7 @@ paths:
             default: 20
       responses:
         '200':
-          description: Success
+          description: 成功
           content:
             application/json:
               schema:
@@ -344,7 +363,7 @@ paths:
                   limit:
                     type: integer
         '401':
-          description: Unauthorized
+          description: 認証が必要です
           content:
             application/json:
               schema:
@@ -363,25 +382,25 @@ paths:
               $ref: '#/components/schemas/CreateUserRequest'
       responses:
         '201':
-          description: User created
+          description: ユーザーが作成されました
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/User'
         '400':
-          description: Validation error
+          description: 検証エラー
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
         '401':
-          description: Unauthorized
+          description: 認証が必要です
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
         '409':
-          description: User already exists
+          description: ユーザーは既に存在します
           content:
             application/json:
               schema:
@@ -395,13 +414,13 @@ paths:
         - users
       responses:
         '200':
-          description: Success
+          description: 成功
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/User'
         '401':
-          description: Unauthorized
+          description: 認証が必要です
           content:
             application/json:
               schema:
@@ -420,19 +439,19 @@ paths:
               $ref: '#/components/schemas/UpdateUserRequest'
       responses:
         '200':
-          description: User updated
+          description: ユーザーが更新されました
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/User'
         '400':
-          description: Validation error
+          description: 検証エラー
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
         '401':
-          description: Unauthorized
+          description: 認証が必要です
           content:
             application/json:
               schema:
@@ -443,7 +462,7 @@ paths:
       - name: userId
         in: path
         required: true
-        description: User ID
+        description: ユーザーID
         schema:
           type: string
           format: uuid
@@ -455,13 +474,13 @@ paths:
         - users
       responses:
         '200':
-          description: Success
+          description: 成功
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/User'
         '404':
-          description: User not found
+          description: ユーザーが見つかりません
           content:
             application/json:
               schema:
@@ -480,19 +499,19 @@ paths:
               $ref: '#/components/schemas/UpdateUserRequest'
       responses:
         '200':
-          description: User updated
+          description: ユーザーが更新されました
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/User'
         '400':
-          description: Validation error
+          description: 検証エラー
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
         '404':
-          description: User not found
+          description: ユーザーが見つかりません
           content:
             application/json:
               schema:
@@ -505,9 +524,9 @@ paths:
         - users
       responses:
         '204':
-          description: User deleted
+          description: ユーザーが削除されました
         '404':
-          description: User not found
+          description: ユーザーが見つかりません
           content:
             application/json:
               schema:
