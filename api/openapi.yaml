@@ -43,6 +43,14 @@ components:
             - RATE_LIMIT_EXCEEDED
             - INTERNAL_ERROR
           example: 'CONFLICT'
+          x-enum-descriptions:
+            VALIDATION_ERROR: '入力値の検証エラー'
+            UNAUTHORIZED: '認証が必要'
+            FORBIDDEN: 'アクセス権限なし'
+            NOT_FOUND: 'リソースが存在しない'
+            CONFLICT: 'リソースの競合'
+            RATE_LIMIT_EXCEEDED: 'レート制限超過'
+            INTERNAL_ERROR: 'サーバー内部エラー'
         message:
           type: string
           description: エラーメッセージ
@@ -258,6 +266,15 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+              examples:
+                invalid_credentials:
+                  summary: ログイン失敗
+                  value:
+                    code: 'UNAUTHORIZED'
+                    message: 'Invalid email or password'
+                    timestamp: '2025-01-20T10:30:00Z'
+                    traceId: 'a1b2c3d4-4567-8901-2def-345678901234'
+                    path: '/api/v1/auth/login'
 
   /auth/refresh:
     post:
@@ -316,12 +333,52 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+              examples:
+                validation_error:
+                  summary: 複数フィールドのバリデーションエラー
+                  value:
+                    code: 'VALIDATION_ERROR'
+                    message: 'Validation failed for multiple fields'
+                    details:
+                      errors:
+                        - field: 'email'
+                          type: 'invalid'
+                          message: 'Invalid email format'
+                        - field: 'password'
+                          type: 'pattern'
+                          message: 'Password does not meet requirements'
+                    timestamp: '2025-01-20T10:30:00Z'
+                    traceId: 'd5f6g1g0-3456-7890-1cde-f01234567890'
+                    path: '/api/v1/auth/register'
         '409':
           description: ユーザーは既に存在します
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+              examples:
+                email_conflict:
+                  summary: メールアドレスの重複
+                  value:
+                    code: 'CONFLICT'
+                    message: 'User with email user@example.com already exists'
+                    details:
+                      field: 'email'
+                      value: 'user@example.com'
+                    timestamp: '2025-01-20T10:30:00Z'
+                    traceId: 'b3d4f9e8-1234-5678-9abc-def012345678'
+                    path: '/api/v1/auth/register'
+                username_conflict:
+                  summary: ユーザー名の重複
+                  value:
+                    code: 'CONFLICT'
+                    message: 'User with username john_doe already exists'
+                    details:
+                      field: 'username'
+                      value: 'john_doe'
+                    timestamp: '2025-01-20T10:30:00Z'
+                    traceId: 'c4e5f0f9-2345-6789-0bcd-ef0123456789'
+                    path: '/api/v1/auth/register'
 
   /users:
     get:
