@@ -1,5 +1,39 @@
-import type { Error as ApiError } from '@/api/generated/types.gen';
+import type { Error as ApiError, ErrorMessageMap } from '@/api/generated/types.gen';
+import { client } from '@/api/generated/client';
 import { ERROR_MESSAGES, FIELD_ERROR_MESSAGES, HTTP_STATUS_MESSAGES } from '@/constants/errorMessages';
+
+// APIから取得したエラーメッセージのキャッシュ
+let cachedErrorMessages: ErrorMessageMap | null = null;
+
+/**
+ * APIからエラーメッセージ一覧を取得してキャッシュ
+ * 
+ * @returns エラーメッセージマップ
+ * 
+ * @example
+ * ```typescript
+ * // アプリケーション起動時に一度だけ実行
+ * await fetchErrorMessages();
+ * ```
+ */
+export async function fetchErrorMessages(): Promise<ErrorMessageMap> {
+  if (cachedErrorMessages) {
+    return cachedErrorMessages;
+  }
+
+  try {
+    const response = await client.getErrorMessages();
+    if (response.data) {
+      cachedErrorMessages = response.data;
+      return response.data;
+    }
+  } catch (error) {
+    console.error('Failed to fetch error messages:', error);
+  }
+
+  // フェッチに失敗した場合はローカル定義を使用
+  return ERROR_MESSAGES as unknown as ErrorMessageMap;
+}
 
 /**
  * APIエラーから適切なエラーメッセージを取得
@@ -22,9 +56,54 @@ export function getErrorMessage(error: ApiError | undefined): string {
     return ERROR_MESSAGES.INTERNAL_ERROR;
   }
 
-  // エラーコードに対応するメッセージを取得
+  // 1. まずAPIレスポンスの日本語メッセージを確認
+  if (error.messageJa) {
+    return error.messageJa;
+  }
+
+  // 2. 次にローカルの定義済みメッセージを確認
   const code = error.code as keyof typeof ERROR_MESSAGES;
   return ERROR_MESSAGES[code] || ERROR_MESSAGES.INTERNAL_ERROR;
+}
+
+/**
+ * APIから取得したメッセージマップを使用してエラーメッセージを取得
+ * 
+ * @param error APIエラーオブジェクト
+ * @param messages エラーメッセージマップ（省略時はキャッシュを使用）
+ * @returns ユーザー向けエラーメッセージ
+ * 
+ * @example
+ * ```typescript
+ * // 初期化時
+ * const messages = await fetchErrorMessages();
+ * 
+ * // エラーハンドリング時
+ * catch (error) {
+ *   const message = getErrorMessageFromMap(error.body);
+ *   toast.error(message);
+ * }
+ * ```
+ */
+export function getErrorMessageFromMap(
+  error: ApiError | undefined,
+  messages?: ErrorMessageMap
+): string {
+  if (!error) {
+    return ERROR_MESSAGES.INTERNAL_ERROR;
+  }
+
+  // 1. APIレスポンスの日本語メッセージを確認
+  if (error.messageJa) {
+    return error.messageJa;
+  }
+
+  // 2. メッセージマップから取得
+  const messageMap = messages || cachedErrorMessages || ERROR_MESSAGES;
+  const code = error.code as keyof ErrorMessageMap;
+  const message = messageMap[code];
+
+  return message || ERROR_MESSAGES.INTERNAL_ERROR;
 }
 
 /**
