@@ -11,7 +11,9 @@
       "Bash(docker compose:*)",
       "Bash(sudo rm:*)",
       "Bash(sudo tar:*)",
-      "WebFetch(domain:docs.anthropic.com)"
+      "WebFetch(domain:docs.anthropic.com)",
+      "Bash(chmod:*)",
+      "mcp__ide__getDiagnostics"
     ],
     "deny": []
   }

@@ -22,6 +22,7 @@ components:
       type: http
       scheme: bearer
       bearerFormat: JWT
+      description: 'Authorization: Bearer <token>'
 
   schemas:
     Error:
@@ -42,6 +43,10 @@ components:
 
     User:
       type: object
+      required:
+        - id
+        - email
+        - username
       properties:
         id:
           type: string
@@ -49,34 +54,23 @@ components:
         email:
           type: string
           format: email
-        name:
+        username:
           type: string
-        createdAt:
+          minLength: 3
+          maxLength: 100
+        fullName:
           type: string
-          format: date-time
-        updatedAt:
+          maxLength: 255
+        avatarUrl:
           type: string
-          format: date-time
-
-    Todo:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-        title:
-          type: string
-          minLength: 1
-          maxLength: 200
-        description:
-          type: string
-          maxLength: 1000
-        completed:
+          format: uri
+          maxLength: 500
+        isActive:
+          type: boolean
+          default: true
+        isVerified:
           type: boolean
           default: false
-        userId:
-          type: string
-          format: uuid
         createdAt:
           type: string
           format: date-time
@@ -84,31 +78,75 @@ components:
           type: string
           format: date-time
 
-    CreateTodoRequest:
+    CreateUserRequest:
       type: object
       required:
-        - title
+        - email
+        - username
+        - password
       properties:
-        title:
+        email:
           type: string
-          minLength: 1
-          maxLength: 200
-        description:
+          format: email
+        username:
           type: string
-          maxLength: 1000
+          minLength: 3
+          maxLength: 100
+        password:
+          type: string
+          minLength: 8
+          maxLength: 128
+        fullName:
+          type: string
+          maxLength: 255
+        avatarUrl:
+          type: string
+          format: uri
+          maxLength: 500
 
-    UpdateTodoRequest:
+    UpdateUserRequest:
       type: object
       properties:
-        title:
+        email:
           type: string
-          minLength: 1
-          maxLength: 200
-        description:
+          format: email
+        username:
           type: string
-          maxLength: 1000
-        completed:
+          minLength: 3
+          maxLength: 100
+        fullName:
+          type: string
+          maxLength: 255
+        avatarUrl:
+          type: string
+          format: uri
+          maxLength: 500
+        isActive:
           type: boolean
+        isVerified:
+          type: boolean
+
+    RegisterRequest:
+      type: object
+      required:
+        - email
+        - username
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+        username:
+          type: string
+          minLength: 3
+          maxLength: 100
+        password:
+          type: string
+          minLength: 8
+          maxLength: 128
+        fullName:
+          type: string
+          maxLength: 255
 
     LoginRequest:
       type: object
@@ -217,18 +255,61 @@ paths:
                   refreshToken:
                     type: string
 
-  /todos:
-    get:
-      summary: Get all todos
-      operationId: getTodos
+  /auth/register:
+    post:
+      summary: Register a new user
+      operationId: register
       tags:
-        - todos
+        - auth
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '201':
+          description: User registered successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: User already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /users:
+    get:
+      summary: Get all users
+      operationId: getUsers
+      tags:
+        - users
       parameters:
-        - name: completed
+        - name: isActive
           in: query
-          description: Filter by completion status
+          description: Filter by active status
           schema:
             type: boolean
+        - name: isVerified
+          in: query
+          description: Filter by verification status
+          schema:
+            type: boolean
+        - name: search
+          in: query
+          description: Search by email or username
+          schema:
+            type: string
         - name: page
           in: query
           description: Page number
@@ -255,7 +336,7 @@ paths:
                   data:
                     type: array
                     items:
-                      $ref: '#/components/schemas/Todo'
+                      $ref: '#/components/schemas/User'
                   total:
                     type: integer
                   page:
@@ -270,23 +351,80 @@ paths:
                 $ref: '#/components/schemas/Error'
 
     post:
-      summary: Create a new todo
-      operationId: createTodo
+      summary: Create a new user (admin only)
+      operationId: createUser
       tags:
-        - todos
+        - users
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateTodoRequest'
+              $ref: '#/components/schemas/CreateUserRequest'
       responses:
         '201':
-          description: Todo created
+          description: User created
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Todo'
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: User already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /users/me:
+    get:
+      summary: Get current user
+      operationId: getCurrentUser
+      tags:
+        - users
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    put:
+      summary: Update current user
+      operationId: updateCurrentUser
+      tags:
+        - users
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserRequest'
+      responses:
+        '200':
+          description: User updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
         '400':
           description: Validation error
           content:
@@ -300,53 +438,53 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
-  /todos/{todoId}:
+  /users/{userId}:
     parameters:
-      - name: todoId
+      - name: userId
         in: path
         required: true
-        description: Todo ID
+        description: User ID
         schema:
           type: string
           format: uuid
 
     get:
-      summary: Get a todo by ID
-      operationId: getTodoById
+      summary: Get a user by ID
+      operationId: getUserById
       tags:
-        - todos
+        - users
       responses:
         '200':
           description: Success
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Todo'
+                $ref: '#/components/schemas/User'
         '404':
-          description: Todo not found
+          description: User not found
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
 
     put:
-      summary: Update a todo
-      operationId: updateTodo
+      summary: Update a user (admin only)
+      operationId: updateUser
       tags:
-        - todos
+        - users
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UpdateTodoRequest'
+              $ref: '#/components/schemas/UpdateUserRequest'
       responses:
         '200':
-          description: Todo updated
+          description: User updated
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Todo'
+                $ref: '#/components/schemas/User'
         '400':
           description: Validation error
           content:
@@ -354,22 +492,22 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
         '404':
-          description: Todo not found
+          description: User not found
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
 
     delete:
-      summary: Delete a todo
-      operationId: deleteTodo
+      summary: Delete a user (admin only)
+      operationId: deleteUser
       tags:
-        - todos
+        - users
       responses:
         '204':
-          description: Todo deleted
+          description: User deleted
         '404':
-          description: Todo not found
+          description: User not found
           content:
             application/json:
               schema:
