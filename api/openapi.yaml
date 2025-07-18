@@ -32,10 +32,10 @@ components:
       properties:
         code:
           type: string
-          example: "VALIDATION_ERROR"
+          example: 'VALIDATION_ERROR'
         message:
           type: string
-          example: "Validation failed"
+          example: 'Validation failed'
         details:
           type: object
           additionalProperties: true
